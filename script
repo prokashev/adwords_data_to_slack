@@ -1,0 +1,48 @@
+var SLACK_URL = 'https://hooks.slack.com/services/YOUR/WEBHOOK/HERE';
+
+function main() {
+  var campaignSelector = AdWordsApp.campaigns()
+      .withCondition ('Name CONTAINS_IGNORE_CASE "YouTrack_"')
+  var YouTrack_total = 0;
+  var YouTrack_total_impressions = 0;
+  var YouTrack_total_clicks = 0;
+  var YouTrack_total_ctr = 0;
+var campaignIterator = campaignSelector.get();
+while (campaignIterator.hasNext()) {
+  var campaign = campaignIterator.next();
+    var stats = campaign.getStatsFor('YESTERDAY');
+  var totalcost = stats.getCost()
+  YouTrack_total = YouTrack_total + totalcost;
+  var totalclicks = stats.getClicks()
+  YouTrack_total_clicks = YouTrack_total_clicks + totalclicks;
+  var totalimpressions = stats.getImpressions()
+  YouTrack_total_impressions = YouTrack_total_impressions + totalimpressions;
+  }
+sendSlackMessage("YouTrack search campaigns stats for yesterday")
+var body = "YouTrack Adwords Spend: $" + YouTrack_total.toFixed(2);
+Logger.log(body);
+  sendSlackMessage(body);
+var impressions = "YouTrack Adwords Impressions: " + YouTrack_total_impressions.toFixed(0);
+Logger.log(impressions);
+  sendSlackMessage(impressions);
+var clicks = "YouTrack Adwords Clicks: " + YouTrack_total_clicks.toFixed(0);
+Logger.log(clicks);
+  sendSlackMessage(clicks);
+}
+
+function sendSlackMessage(text, opt_channel) {
+  var slackMessage = {
+    text: text,
+    icon_url:
+        'https://www.gstatic.com/images/icons/material/product/1x/adwords_64dp.png',
+    username: 'AdWords Scripts',
+    channel: opt_channel || '#your_channel_name'
+  };
+
+  var options = {
+    method: 'POST',
+    contentType: 'application/json',
+    payload: JSON.stringify(slackMessage)
+  };
+  UrlFetchApp.fetch(SLACK_URL, options);
+}
